@@ -1,0 +1,324 @@
+Run all
+
+java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=true -Dami.isRunHighUsageAlerts=true -Dami.isRunLeakAlerts=true -Dami.isUpdateMeterNextRead=true -Dsun.security.krb5.debug=true -DskipDefaults=true -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=$AMI_BASE_DIRECTORY/.hive-jdbc-prod/krb5.ini -jar /ami-data.jar
+
+*********************************
+	PRODUCTION LAB TIMINGS 
+*********************************
+
+[root@staplrecs001 ~]# crontab -l
+################################
+#  AMI PRODUCTION - APPORCHID  #
+################################
+
+################################
+# EVERY HOUR TRIGGER
+################################
+#hourly
+05 * * 7-11 * java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &
+
+###############################
+# ONCE IN A DAY GOES HERE     #
+###############################
+
+#daily
+05 21 * 7-11 * java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=true -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.daily-prod.log 2>&1 &
+
+#daily_meter_next_read
+45 22 * 7-11 * java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=true -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.daily_meter_next_read-prod.log 2>&1 &
+
+#daily_usage_prediction
+00 23 * 7-11 * java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dami.isRunUsagePrediction=true -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.daily_usage_prediction-prod.log 2>&1 &
+
+#high_usage_hourly_prod
+15 22 * 7-11 * java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=true -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.daily_high_usage-prod.log 2>&1 &
+
+#leak_alerts_hourly_prod
+45 21 * 7-11 * java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=true -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.daily_leak_alerts-prod.log 2>&1 &
+[root@staplrecs001 ~]#
+
+old records
+[root@staplrecs001 ami_jobs]# crontab -l
+################################
+#  AMI PRODUCTION - APPORCHID  #
+################################
+
+################################
+# EVERY HOUR TRIGGER
+################################
+#hourly
+05 * * 7-9 * java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &
+
+###############################
+# ONCE IN A DAY GOES HERE     #
+###############################
+
+#daily
+05 21 * 7-9 * java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=true -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.daily-prod.log 2>&1 &
+
+#daily_meter_next_read
+45 22 * 7-9 * java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=true -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.daily_meter_next_read-prod.log 2>&1 &
+
+#daily_usage_prediction
+00 23 * 7-9 * java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dami.isRunUsagePrediction=true -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.daily_usage_prediction-prod.log 2>&1 &
+
+#high_usage_hourly_prod
+15 22 * 7-9 * java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=true -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.daily_high_usage-prod.log 2>&1 &
+
+#leak_alerts_hourly_prod
+45 21 * 7-9 * java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=true -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.daily_leak_alerts-prod.log 2>&1 &
+[root@staplrecs001 ami_jobs]#
+
+
+
+
+
+
+
+
+Lower Lab - QA
+
+MAILTO=girishm@apporchid.com
+
+[maniy@staplrecs001 npload]$ crontab -l
+################################
+#  AMI NON_PROD   - APPORCHID  #
+################################
+
+################################
+# EVERY HOUR TRIGGER
+################################
+#hourly
+09 * * 8-10 * java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &
+
+
+###############################
+# ONCE IN A DAY GOES HERE     #
+###############################
+
+#daily
+09 21 * 8-10 * java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=true -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.daily-nonprod.log 2>&1 &
+
+#daily_meter_next_read
+49 22 * 8-10 * java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=true -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.daily_meter_next_read-nonprod.log 2>&1 &
+
+#daily_usage_prediction
+09 23 * 8-10 * java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dami.isRunUsagePrediction=true -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.daily_usage_prediction-nonprod.log 2>&1 &
+
+#high_usage_hourly_prod
+19 22 * 8-10 * java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=true -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.daily_high_usage-nonprod.log 2>&1 &
+
+#leak_alerts_hourly_prod
+49 21 * 8-10 * java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=true -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.daily_leak_alerts-nonprod.log 2>&1 &
+
+
+[maniy@staplrecs001 npload]$ ls -lR
+.:
+total 29464
+-rw-r--r--. 1 maniy basis 30145109 Aug 28 06:33 ami-data.jar
+-rwxr-xr-x. 1 maniy basis     1476 Aug 28 06:06 analyse_qa_db.sh
+-rw-r--r--. 1 maniy basis     2415 Aug 28 06:37 application-npload.properties
+-rwxr-xr-x. 1 maniy basis     1106 Aug 27 12:36 housekeeper_qa.sh
+drwxr-xr-x. 2 maniy basis     4096 Aug 28 06:21 logs
+-rw-r--r--. 1 maniy basis     1665 Aug 25 02:57 sat.log
+-rwxr-xr-x. 1 maniy basis     1025 Aug 28 06:05 truncate_qa.sh
+
+./logs:
+total 5576
+-rw-r--r--. 1 maniy basis   17019 Aug 28 06:07 analyze_query_run.log
+-rw-r--r--. 1 maniy basis 3530150 Aug 27 22:19 crontab.daily_high_usage-nonprod.log
+-rw-r--r--. 1 maniy basis   87302 Aug 27 21:49 crontab.daily_leak_alerts-nonprod.log
+-rw-r--r--. 1 maniy basis   66001 Aug 27 22:49 crontab.daily_meter_next_read-nonprod.log
+-rw-r--r--. 1 maniy basis   85094 Aug 27 21:09 crontab.daily-nonprod.log
+-rw-r--r--. 1 maniy basis   49145 Aug 27 23:09 crontab.daily_usage_prediction-nonprod.log
+-rw-r--r--. 1 maniy basis 1859002 Aug 28 06:09 crontab.hourly-nonprod.log
+[maniy@staplrecs001 npload]$ cat analyse_qa_db.sh
+#! /bin/bash
+#                                      ____           _     _     _
+#                   /\                / __ \         | |   (_)   | |
+#                  /  \   _ __  _ __ | |  | |_ __ ___| |__  _  __| |
+#                 / /\ \ | '_ \| '_ \| |  | | '__/ __| '_ \| |/ _` |
+#                / ____ \| |_) | |_) | |__| | | | (__| | | | | (_| |
+#               /_/    \_\ .__/| .__/ \____/|_|  \___|_| |_|_|\__,_|
+#                        | |   | |
+#                        |_|   |_|
+#
+
+#
+# Credit - girish.mahajan@accionlabs.com
+
+function log_info {
+         echo -e `date +%d/%m/%Y-%H:%M:%S ` "\033[32m# INFO    # " $1 "\033[0m" | tee -a ~/npload/logs/analyze_query_run.log
+}
+
+function executeQuery {
+
+local query="$1";
+
+log_info "Running $query";
+
+PGPASSWORD=System psql -q -U postgres -d postgresql://hsynlapps004.amwaternp.net:5432/ao-aw-cloudseer3 -c "$query"
+
+}
+
+executeQuery "SELECT COUNT(*) FROM app.meter_ami_reads"
+
+
+log_info "========================= HOURLY NEW ====================================="
+executeQuery "SELECT COUNT(*) FROM app.meter_ami_reads_hourly"
+executeQuery "SELECT max(reading_datetime) as max_hourly_date, min(reading_datetime) as min_hourly_date FROM app.meter_ami_reads_hourly"
+
+log_info "========================= DAILY NEW ====================================="
+executeQuery "SELECT COUNT(*) FROM app.meter_ami_reads_daily"
+executeQuery "SELECT max(reading_datetime) as max_daily_date, min(reading_datetime) as min_daily_date FROM app.meter_ami_reads_daily"
+
+[maniy@staplrecs001 npload]$ cat housekeeper_qa.sh
+#! /bin/bash
+#                                      ____           _     _     _
+#                   /\                / __ \         | |   (_)   | |
+#                  /  \   _ __  _ __ | |  | |_ __ ___| |__  _  __| |
+#                 / /\ \ | '_ \| '_ \| |  | | '__/ __| '_ \| |/ _` |
+#                / ____ \| |_) | |_) | |__| | | | (__| | | | | (_| |
+#               /_/    \_\ .__/| .__/ \____/|_|  \___|_| |_|_|\__,_|
+#                        | |   | |
+#                        |_|   |_|
+#
+
+#
+# Credit - girish.mahajan@accionlabs.com
+
+function log_info {
+         echo -e `date +%d/%m/%Y-%H:%M:%S ` "\033[32m# INFO    # " $1 "\033[0m" | tee -a ~/npload/logs/analyze_query_run.log
+}
+
+function executeQuery {
+
+local query="$1";
+
+log_info "Running $query";
+
+PGPASSWORD=System psql -q -U postgres -d postgresql://hsynlapps004.amwaternp.net:5432/ao-aw-cloudseer3 -c "$query"
+
+}
+
+
+log_info "AMI data housekeeper starting"
+executeQuery "REINDEX TABLE app.meter_ami_reads_daily";
+executeQuery "REINDEX TABLE app.meter_ami_reads_hourly";
+
+executeQuery "REINDEX INDEX meter_ami_reads_hourly_index"
+log_info "AMI data housekeeper stopping"
+
+
+[maniy@staplrecs001 npload]$ cat truncate_qa.sh
+#! /bin/bash
+#                                      ____           _     _     _
+#                   /\                / __ \         | |   (_)   | |
+#                  /  \   _ __  _ __ | |  | |_ __ ___| |__  _  __| |
+#                 / /\ \ | '_ \| '_ \| |  | | '__/ __| '_ \| |/ _` |
+#                / ____ \| |_) | |_) | |__| | | | (__| | | | | (_| |
+#               /_/    \_\ .__/| .__/ \____/|_|  \___|_| |_|_|\__,_|
+#                        | |   | |
+#                        |_|   |_|
+#
+
+#
+# Credit - girish.mahajan@accionlabs.com
+
+function log_info {
+         echo -e `date +%d/%m/%Y-%H:%M:%S ` "\033[32m# INFO    # " $1 "\033[0m" | tee -a ~/npload/logs/analyze_query_run.log
+}
+
+function executeQuery {
+
+local query="$1";
+
+log_info "Running $query";
+
+PGPASSWORD=System psql -q -U postgres -d postgresql://hsynlapps004.amwaternp.net:5432/ao-aw-cloudseer3 -c "$query"
+
+}
+
+
+log_info "AMI data postgres cleaning / truncating starting"
+executeQuery "TRUNCATE TABLE app.meter_ami_reads_daily";
+executeQuery "TRUNCATE TABLE app.meter_ami_reads_hourly";
+[maniy@staplrecs001 npload]$
+
+
+
+
+
+
+
+=========================================
+
+
+[root@staplrecs001 log]# grep java cron | grep "Oct  2" | grep npload | wc -l
+29
+[root@staplrecs001 log]# grep java cron | grep "Oct  2" | grep npload
+Oct  2 00:09:01 staplrecs001 CROND[70337]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 01:09:01 staplrecs001 CROND[75318]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 02:09:01 staplrecs001 CROND[80234]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 03:09:01 staplrecs001 CROND[85169]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 04:09:01 staplrecs001 CROND[90193]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 05:09:01 staplrecs001 CROND[95130]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 06:09:01 staplrecs001 CROND[100075]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 07:09:01 staplrecs001 CROND[105004]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 08:09:01 staplrecs001 CROND[109982]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 09:09:01 staplrecs001 CROND[114925]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 10:09:01 staplrecs001 CROND[119871]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 11:09:01 staplrecs001 CROND[124809]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 12:09:01 staplrecs001 CROND[129793]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 13:09:01 staplrecs001 CROND[4199]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 14:09:02 staplrecs001 CROND[9131]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 15:09:02 staplrecs001 CROND[14073]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 16:09:02 staplrecs001 CROND[19068]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 17:09:02 staplrecs001 CROND[24003]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 18:09:02 staplrecs001 CROND[28938]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 19:09:02 staplrecs001 CROND[33874]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 20:09:01 staplrecs001 CROND[38861]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 21:09:01 staplrecs001 CROND[43833]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 21:09:01 staplrecs001 CROND[43834]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=true -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.daily-nonprod.log 2>&1 &)
+Oct  2 21:49:01 staplrecs001 CROND[46923]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=true -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.daily_leak_alerts-nonprod.log 2>&1 &)
+Oct  2 22:09:01 staplrecs001 CROND[48846]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 22:19:01 staplrecs001 CROND[49475]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=true -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.daily_high_usage-nonprod.log 2>&1 &)
+Oct  2 22:49:01 staplrecs001 CROND[51955]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=true -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.daily_meter_next_read-nonprod.log 2>&1 &)
+Oct  2 23:09:01 staplrecs001 CROND[53905]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.hourly-nonprod.log 2>&1 &)
+Oct  2 23:09:01 staplrecs001 CROND[53906]: (maniy) CMD (java -Dami.config.file=/home/MANIY/npload/application-npload.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dami.isRunUsagePrediction=true -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/home/MANIY/npload/.hive-jdbc-prod/krb5.ini -jar /home/MANIY/npload/ami-data.jar >> /home/MANIY/npload/logs/crontab.daily_usage_prediction-nonprod.log 2>&1 &)
+[root@staplrecs001 log]#
+
+[root@staplrecs001 log]# grep java cron | grep "Oct  2" | grep ami_jobs | wc -l
+29
+[root@staplrecs001 log]# grep java cron | grep "Oct  2" | grep ami_jobs
+Oct  2 00:05:01 staplrecs001 CROND[69959]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 01:05:01 staplrecs001 CROND[75065]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 02:05:01 staplrecs001 CROND[79982]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 03:05:01 staplrecs001 CROND[84916]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 04:05:01 staplrecs001 CROND[89937]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 05:05:01 staplrecs001 CROND[94873]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 06:05:01 staplrecs001 CROND[99819]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 07:05:01 staplrecs001 CROND[104752]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 08:05:01 staplrecs001 CROND[109731]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 09:05:01 staplrecs001 CROND[114667]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 10:05:01 staplrecs001 CROND[119617]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 11:05:01 staplrecs001 CROND[124557]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 12:05:01 staplrecs001 CROND[129538]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 13:05:02 staplrecs001 CROND[3944]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 14:05:01 staplrecs001 CROND[8876]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 15:05:01 staplrecs001 CROND[13818]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 16:05:01 staplrecs001 CROND[18808]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 17:05:01 staplrecs001 CROND[23746]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 18:05:01 staplrecs001 CROND[28683]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 19:05:01 staplrecs001 CROND[33619]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 20:05:01 staplrecs001 CROND[38606]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 21:05:01 staplrecs001 CROND[43556]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 21:05:01 staplrecs001 CROND[43557]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=true -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.daily-prod.log 2>&1 &)
+Oct  2 21:45:01 staplrecs001 CROND[46675]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=true -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.daily_leak_alerts-prod.log 2>&1 &)
+Oct  2 22:05:02 staplrecs001 CROND[48591]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+Oct  2 22:15:01 staplrecs001 CROND[49226]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=true -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.daily_high_usage-prod.log 2>&1 &)
+Oct  2 22:45:01 staplrecs001 CROND[51699]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=true -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.daily_meter_next_read-prod.log 2>&1 &)
+Oct  2 23:00:01 staplrecs001 CROND[53256]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=false -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dami.isRunUsagePrediction=true -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.daily_usage_prediction-prod.log 2>&1 &)
+Oct  2 23:05:01 staplrecs001 CROND[53647]: (root) CMD (java -Dami.config.file=/apporchid/ami_jobs/application-prod.properties -Dami.isLoadHourlyData=true -Dami.isLoadDailyData=false -Dami.isRunHighUsageAlerts=false -Dami.isRunLeakAlerts=false -Dami.isUpdateMeterNextRead=false -Dsun.security.krb5.debug=true -DskipDefaults=false -Dhadoop.home.dir=java.io.tmpdir -Djava.net.debug=true -Djava.security.krb5.conf=/apporchid/ami_jobs/.hive-jdbc-prod/krb5.ini -jar /apporchid/ami_jobs/ami-data.jar >> /apporchid/ami_jobs/logs/crontab.hourly-prod.log 2>&1 &)
+[root@staplrecs001 log]#
+
