@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.TimeZone;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
@@ -161,12 +162,13 @@ public class LoadAMIData
     return applicationConfig.getString(c.getKey());
   }
 
-  public static void maina(String[] args)
+  public static void main2(String[] args)
     throws Exception
   {
-    logger.info(getConfigValue(ApplicationConfig.APP_CONFIG_HIVE_JDBC_URI));
-    logger.info(Boolean.valueOf("jdbc:hive2://hsynlhdps202.amwaternp.net:2181,hsynlhdps200.amwaternp.net:2181,hsynlhdps201.amwaternp.net:2181/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2-hive2".matches(getConfigValue(ApplicationConfig.APP_CONFIG_HIVE_JDBC_URI))));
-    logger.info(Boolean.valueOf("jdbc:hive2://staplhdpsm002.amwater.net:2181,staplhdpsm005.amwater.net:2181,staplhdpsm006.amwater.net:2181,staplhdpsm003.amwater.net:2181,staplhdpsm004.amwater.net:2181/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2-hive2".matches(getConfigValue(ApplicationConfig.APP_CONFIG_HIVE_JDBC_URI))));
+	  System.out.println(getTime());
+    //logger.info(getConfigValue(ApplicationConfig.APP_CONFIG_HIVE_JDBC_URI));
+    //logger.info(Boolean.valueOf("jdbc:hive2://hsynlhdps202.amwaternp.net:2181,hsynlhdps200.amwaternp.net:2181,hsynlhdps201.amwaternp.net:2181/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2-hive2".matches(getConfigValue(ApplicationConfig.APP_CONFIG_HIVE_JDBC_URI))));
+    //logger.info(Boolean.valueOf("jdbc:hive2://staplhdpsm002.amwater.net:2181,staplhdpsm005.amwater.net:2181,staplhdpsm006.amwater.net:2181,staplhdpsm003.amwater.net:2181,staplhdpsm004.amwater.net:2181/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2-hive2".matches(getConfigValue(ApplicationConfig.APP_CONFIG_HIVE_JDBC_URI))));
   }
 
   public static void main(String[] args)
@@ -175,6 +177,7 @@ public class LoadAMIData
     System.setProperty("java.net.debug", "true");
 
     boolean loadHourlyData = Boolean.parseBoolean(System.getProperty("ami.isLoadHourlyData", "false"));
+    boolean loadHourlyDataWV = Boolean.parseBoolean(System.getProperty("ami.isLoadHourlyDataWV", "false"));
     boolean loadDailyData = Boolean.parseBoolean(System.getProperty("ami.isLoadDailyData", "false"));
     boolean loadDailyDataWV = Boolean.parseBoolean(System.getProperty("ami.isLoadDailyDataWV", "false"));
     boolean runHighUsageAlerts = Boolean.parseBoolean(System.getProperty("ami.isRunHighUsageAlerts", "false"));
@@ -193,6 +196,13 @@ public class LoadAMIData
       isZookeeperConnected = true;
       updateHourlyData(hiveConn, pgConn);
     }
+    
+    if (loadHourlyDataWV) {
+        if (!isZookeeperConnected) {
+          hiveConn = zookeeperConnect();
+        }
+        loadHourlyDataWV(hiveConn, pgConn);
+      }
 
     if (loadDailyData) {
       if (!isZookeeperConnected) {
@@ -281,7 +291,7 @@ public class LoadAMIData
 
   private static void getHighUsage(Connection pgConn, double zScore, int numOfPastMonths, int minimumUsage) throws Exception
   {
-    String highUsageSQL = "SELECT mar.businesspartnernumber, mar.contractaccount, trim(leading '0' FROM mar.equipmentnumber) , mr2.last_read_time, sum(mar.consumption), ami_calc.high_usage_limit FROM app.meter_ami_reads_daily mar JOIN ( SELECT mv2.meter_id, mv2.business_partner_number, mv2.connection_contract_number, max(meter_reading_time) last_read_time FROM app.meter_readings_v2 mr2 JOIN app.meters_v2 mv2 ON mv2.meter_id = mr2.meter_id AND mv2.installation = mr2.installation AND mv2.register = mr2.register AND mv2.isactive = 'Yes' AND district IN ('CA0520', 'CA0560') AND meter_reading_reason = '01' AND end_point_type_1 = '20' GROUP BY mv2.meter_id, mv2.business_partner_number, mv2.connection_contract_number) mr2 ON mr2.meter_id = trim(leading '0' FROM mar.equipmentnumber) AND mr2.business_partner_number = mar.businesspartnernumber AND mr2.connection_contract_number = cast (mar.contractaccount as varchar) JOIN ( SELECT mv2.meter_id, mv2.register, mv2.business_partner_number, mv2.connection_contract_number, sum(consumption_gl) total_consumption, round(avg(consumption_gl):: numeric,2) avg_consumption, round(stddev_pop(consumption_gl):: numeric,2) std_dev_consumption, round((avg(consumption_gl)+2.5*stddev_pop(consumption_gl))::numeric,2) high_usage_limit, extract( day FROM max(meter_reading_time) - min(meter_reading_time)) total_days, sum(consumption_gl)/extract( day FROM max(meter_reading_time) - min(meter_reading_time)) per_day_consumption, min(meter_reading_time) start_date, max(meter_reading_time) end_date, mnr.next_read_date FROM app.meter_readings_v2 mr2 JOIN app.meters_v2 mv2 ON mv2.meter_id = mr2.meter_id AND mv2.installation = mr2.installation AND mv2.register = mr2.register AND mv2.isactive = 'Yes' AND district IN ('CA0520', 'CA0560') AND meter_reading_reason = '01' AND end_point_type_1 = '20' AND meter_reading_time > CURRENT_TIMESTAMP - interval '15 month' JOIN app.meter_next_read mnr ON mnr.meter_reading_unit = mr2.meter_reading_unit GROUP BY mv2.meter_id, mv2.register, mv2.business_partner_number, mv2.connection_contract_number, mnr.next_read_date) ami_calc ON ami_calc.meter_id = trim(leading '0' FROM mar.equipmentnumber) AND ami_calc.business_partner_number = mar.businesspartnernumber AND ami_calc.connection_contract_number = cast (mar.contractaccount as varchar) WHERE mar.reading_datetime > mr2.last_read_time GROUP BY mar.businesspartnernumber, mar.contractaccount, mar.equipmentnumber, mr2.last_read_time, ami_calc.high_usage_limit HAVING ami_calc.high_usage_limit < sum(mar.consumption) AND sum(mar.consumption) > 3000";
+    String highUsageSQL = "SELECT mar.businesspartnernumber, mar.contractaccount, trim(leading '0' FROM mar.equipmentnumber) , mr2.last_read_time, sum(mar.consumption), ami_calc.high_usage_limit FROM app.meter_ami_reads_daily mar JOIN ( SELECT mv2.meter_id, mv2.business_partner_number, mv2.connection_contract_number, max(meter_reading_time) last_read_time FROM app.meter_readings_v2 mr2 JOIN app.meters_v2 mv2 ON mv2.meter_id = mr2.meter_id AND mv2.installation = mr2.installation AND mv2.register = mr2.register AND mv2.isactive = 'Yes' AND mv2.region = 'WV' AND meter_reading_reason = '01' join app.meter_endpoint_type met on mv2.end_point_type_1 = met.id and met.endpoint_group = 'AMI' GROUP BY mv2.meter_id, mv2.business_partner_number, mv2.connection_contract_number) mr2 ON mr2.meter_id = trim(leading '0' FROM mar.equipmentnumber) AND mr2.business_partner_number = mar.businesspartnernumber AND mr2.connection_contract_number = cast (mar.contractaccount AS varchar) JOIN ( SELECT mv2.meter_id, mv2.register, mv2.business_partner_number, mv2.connection_contract_number, sum(consumption_gl) total_consumption, round(avg(consumption_gl):: numeric,2) avg_consumption, round(stddev_pop(consumption_gl):: numeric,2) std_dev_consumption, round((avg(consumption_gl)+2.5*stddev_pop(consumption_gl))::numeric,2) high_usage_limit, extract( day FROM max(meter_reading_time) - min(meter_reading_time)) total_days, sum(consumption_gl)/extract( day FROM max(meter_reading_time) - min(meter_reading_time)) per_day_consumption, min(meter_reading_time) start_date, max(meter_reading_time) end_date, mnr.next_read_date FROM app.meter_readings_v2 mr2 JOIN app.meters_v2 mv2 ON mv2.meter_id = mr2.meter_id AND mv2.installation = mr2.installation AND mv2.register = mr2.register AND mv2.isactive = 'Yes' AND mv2.region = 'WV' AND meter_reading_reason = '01' AND meter_reading_time > CURRENT_TIMESTAMP - interval '15 month' join app.meter_endpoint_type met on mv2.end_point_type_1 = met.id and met.endpoint_group = 'AMI' JOIN app.meter_next_read mnr ON mnr.meter_reading_unit = mr2.meter_reading_unit GROUP BY mv2.meter_id, mv2.register, mv2.business_partner_number, mv2.connection_contract_number, mnr.next_read_date) ami_calc ON ami_calc.meter_id = trim(leading '0' FROM mar.equipmentnumber) AND ami_calc.business_partner_number = mar.businesspartnernumber AND ami_calc.connection_contract_number = cast (mar.contractaccount AS varchar) WHERE mar.reading_datetime > mr2.last_read_time GROUP BY mar.businesspartnernumber, mar.contractaccount, mar.equipmentnumber, mr2.last_read_time, ami_calc.high_usage_limit HAVING ami_calc.high_usage_limit < sum(mar.consumption) AND sum(mar.consumption) > 3000";
 
     debugQuery(highUsageSQL);
     ResultSet rs2 = pgConn.createStatement().executeQuery(highUsageSQL);
@@ -318,7 +328,7 @@ public class LoadAMIData
 
     String hourlySQL = "With tmp as  (select distinct meter_id, transponder_id, transponder_port, cast(customer_id AS String) as functionallocation,                       reading_value, unit_of_measure, reading_datetime, timezone, battery_voltage,            round(reading_value - lag(reading_value, 1) OVER (partition by  meter_id ORDER BY reading_datetime),2) consumption,            unix_timestamp(reading_datetime)- unix_timestamp(lag(reading_datetime, 1) OVER (partition by  meter_id ORDER BY reading_datetime)) read_interval,           ingest_watermark from " + 
       aclaraSourceExternalSchemaName + ".aclara_readings " + 
-      "        where reading_datetime > '" + maxHourlyReadingDatesInPostgresSink + "'" + 
+      "        where reading_datetime > '2018-07-19 00:00:00'" + 
       "          ) " + 
       "        Select distinct " + 
       "               tmp.meter_id as headend_meter_id, " + 
@@ -344,13 +354,34 @@ public class LoadAMIData
       "        inner join cloudseer.mv2_temp cmd on  cmd.equipmentnumber =imd.equipmentnumber " + 
       "              and current_date between cmd.devicevaliditystartdate and cmd.devicevalidityenddate " + 
       "              and current_date between cmd.utilitiesmoveindate and cmd.utilitiesmoveoutdate " + 
-      "              and imd.register = cmd.register " + 
-      "              and cmd.regionalstructuregrouping in (" + getCountiesListSQLString() + ") " + 
+      "              and imd.register = cmd.register " +  
       "        order by headend_meter_id, reading_datetime , imd.register ";
 
     debugQuery(hourlySQL);
     ResultSet rs1 = hiveConn.createStatement().executeQuery(hourlySQL);
     updateAMIData("HOURLY" + intervalSuffix, pgConn, rs1, maxHourlyReadingDatesInPostgresSink);
+    rs1.close();
+  }
+  
+  private static void loadHourlyDataWV(Connection hiveConn, Connection pgConn) throws SQLException
+  {
+    String hourlyDaysThreshold = getConfigValue(ApplicationConfig.APP_CONFIG_TRIGGER_HOURLY_DAYS_MINUS);
+
+    logger.info("hourlyDaysThreshold from config => " + hourlyDaysThreshold);
+
+    if (!hourlyDaysThreshold.startsWith("-")) {
+      throw new RuntimeException("Can not work with the non negative -> actual" + hourlyDaysThreshold);
+    }
+
+    String aclaraSourceExternalSchemaName = getConfigValue(ApplicationConfig.AMI_SCHEMA_SOURCE_ACLARA_READINGS);
+
+    String maxHourlyReadingDatesInPostgresSink = getMaxHourlyReadingDateInSink(pgConn);
+
+    String hourlySQL = "WITH tmp AS (SELECT DISTINCT meter_id, miu_serial_number as transponder_id, '1' as transponder_port, cast(account_id as string) as utilities_premise, reading as reading_value, '' as unit_of_measure, read_date_time as reading_datetime, 'GMT' as timezone, '' as battery_voltage, Round(reading - Lag(reading, 1) over (PARTITION BY meter_id ORDER BY read_date_time), 2) consumption, Unix_timestamp(read_date_time) - Unix_timestamp(Lag(read_date_time, 1) over (PARTITION BY meter_id ORDER BY read_date_time)) read_interval, ingest_watermark FROM awexternal.ami_datamatic_readings WHERE read_date_time > '"+maxHourlyReadingDatesInPostgresSink+"') SELECT DISTINCT tmp.meter_id AS headend_meter_id, tmp.utilities_premise, tmp.reading_datetime, tmp.timezone, tmp.reading_value, tmp.unit_of_measure, tmp.consumption, tmp.read_interval, imd.equipmentnumber, imd.installation, imd.register, imd.logicalregisternumber, cmd.businesspartnernumber, cmd.contractaccount, cmd.utilitiescontract, cmd.regionalstructuregrouping, cmd.devicelocation FROM tmp inner join awinternal.utilitiesinstallation ui on tmp.utilities_premise = ui.utilitiespremise and ui.division <> 'SW' inner join awinternal.installedmeterdetails imd on ui.utilitiesinstallation = imd.installation and current_date BETWEEN imd.devicevaliditystartdate AND imd.devicevalidityenddate and current_date BETWEEN imd.registervaliditystartdate AND imd.registervalidityenddate inner join cloudseer.mv2_temp cmd ON cmd.equipmentnumber = imd.equipmentnumber AND current_date BETWEEN cmd.devicevaliditystartdate AND cmd.devicevalidityenddate AND current_date BETWEEN cmd.utilitiesmoveindate AND cmd.utilitiesmoveoutdate AND imd.register = cmd.register ORDER BY headend_meter_id, reading_datetime, imd.register";
+
+    debugQuery(hourlySQL);
+    ResultSet rs1 = hiveConn.createStatement().executeQuery(hourlySQL);
+    updateAMIDataWV("HOURLY" + intervalSuffix, pgConn, rs1, maxHourlyReadingDatesInPostgresSink);
     rs1.close();
   }
 
@@ -385,7 +416,7 @@ public class LoadAMIData
 			+ " Max(read_date_time) reading_datetime,"
 			+ " Concat(Year(read_date_time), '-', Month(read_date_time), '-',Day(read_date_time)) meterreadingday"
 			+ " FROM awexternal.ami_datamatic_readings"
-			+ " WHERE read_date_time BETWEEN Date_add('2019-04-17', -62) AND '2019-04-17'"
+			+ " WHERE read_date_time BETWEEN Date_add('2019-05-13', -62) AND '2019-05-13'"
 			+ " GROUP BY meter_id,"
 			+ "Concat(Year(read_date_time), '-', Month(read_date_time), '-', Day(read_date_time)) ) last_row"
 			+ " ON last_row.meter_id = ar.meter_id"
@@ -430,7 +461,7 @@ public class LoadAMIData
 	
 	ResultSet rs = hiveConn.createStatement().executeQuery(sql);
 
-	updateAMIDataForWV("DAILY" + intervalSuffix, pgConn, rs);
+	updateAMIDataWV("DAILY" + intervalSuffix, pgConn, rs, null);
     rs.close();
 
   }
@@ -453,7 +484,7 @@ public class LoadAMIData
       "        select meter_id, max(reading_datetime) reading_datetime, " + 
       "        concat(year(reading_datetime), '-', month(reading_datetime),'-',day(reading_datetime)) meterreadingday " + 
       "        from " + aclaraSourceExternalSchemaName + ".aclara_readings  " + 
-      "      where reading_datetime between date_add(current_date," + dailyDaysThreshold + ") and current_date " + 
+      "      where reading_datetime between date_add('2018-07-20'," + dailyDaysThreshold + ") and '2018-07-20' " + 
       "        group by meter_id, concat(year(reading_datetime), '-', month(reading_datetime),'-',day(reading_datetime)) " + 
       "        ) last_row " + 
       "  on last_row.meter_id = ar.meter_id and last_row.reading_datetime = ar.reading_datetime " + 
@@ -483,7 +514,6 @@ public class LoadAMIData
       "      and current_date between cmd.devicevaliditystartdate and cmd.devicevalidityenddate " + 
       "      and current_date between cmd.utilitiesmoveindate and cmd.utilitiesmoveoutdate " + 
       "      and imd.register = cmd.register " + 
-      "      and cmd.regionalstructuregrouping in (" + getCountiesListSQLString() + ") " + 
       "order by headend_meter_id, reading_datetime , imd.register ";
 
     debugQuery(sql);
@@ -522,7 +552,10 @@ public class LoadAMIData
       String insertSQL = null;
 
       if ("DAILY".equals(readIntervalType)) {
-        insertSQL = "INSERT INTO app.meter_ami_reads_daily (             headend_meter_id, functionallocation, reading_datetime,              timezone, reading_value, unit_of_measure, consumption, read_interval,              equipmentnumber, installation, register, logicalregisternumber,              businesspartnernumber, contractaccount, utilitiescontract, regionalstructuregrouping)     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+        insertSQL = "INSERT INTO app.meter_ami_reads_daily (headend_meter_id, functionallocation, reading_datetime, timezone,"
+        		+ " reading_value, unit_of_measure, consumption, read_interval, equipmentnumber, installation, register,"
+        		+ " logicalregisternumber,              businesspartnernumber, contractaccount, utilitiescontract,"
+        		+ " regionalstructuregrouping)     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
       }
 
       if ("HOURLY".equals(readIntervalType))
@@ -531,7 +564,10 @@ public class LoadAMIData
         debugQuery(sliceTodaysReadings);
         pgConn.createStatement().executeUpdate(sliceTodaysReadings);
 
-        insertSQL = "INSERT INTO app.meter_ami_reads_hourly (             headend_meter_id, functionallocation, reading_datetime,              timezone, reading_value, unit_of_measure, consumption, read_interval,              equipmentnumber, installation, register, logicalregisternumber,              businesspartnernumber, contractaccount, utilitiescontract, regionalstructuregrouping)     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+        insertSQL = "INSERT INTO app.meter_ami_reads_hourly (headend_meter_id, functionallocation, reading_datetime, timezone, "
+        		+ "reading_value, unit_of_measure, consumption, read_interval, equipmentnumber, installation, register, "
+        		+ "logicalregisternumber,              businesspartnernumber, contractaccount, utilitiescontract, "
+        		+ "regionalstructuregrouping)     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
       }
 
       debugQuery(insertSQL);
@@ -557,7 +593,6 @@ public class LoadAMIData
 
         pstmt.addBatch();
         count++;
-        System.out.println("CA Daily count="+count);
       }while (sourceResultSet.next());
       pstmt.executeBatch();
 
@@ -571,17 +606,31 @@ public class LoadAMIData
     logger.info("Inserted " + count + " rows");
   }
   
-  private static void updateAMIDataForWV(String readIntervalType, Connection pgConn, ResultSet sourceResultSet) throws SQLException {
+  private static void updateAMIDataWV(String readIntervalType, Connection pgConn, ResultSet sourceResultSet, String maxHourlyReadingDatesInPostgresSinkToSlice) throws SQLException {
 	    int count = 0;
 	    if (sourceResultSet.next())
 	    {
-	    	String deleteSQL = "DELETE FROM app.meter_ami_reads_daily WHERE regionalstructuregrouping like 'WV%' ";
-	    	pgConn.createStatement().executeUpdate(deleteSQL);
-	    	logger.info("All WV Records Deleted");
-	    	
-	      String insertSQL = null;
-	      insertSQL = "INSERT INTO app.meter_ami_reads_daily (headend_meter_id,utilities_premise, reading_datetime,timezone, reading_value, unit_of_measure, consumption, read_interval,              equipmentnumber, installation, register, logicalregisternumber,              businesspartnernumber, contractaccount, utilitiescontract, regionalstructuregrouping, functionallocation )             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
-	      
+	    	String insertSQL = null;
+
+	        if ("DAILY".equals(readIntervalType)) {
+	        	insertSQL = "INSERT INTO app.meter_ami_reads_daily (headend_meter_id, utilities_premise, reading_datetime,timezone,"
+	        			+ " reading_value, unit_of_measure, consumption, read_interval, equipmentnumber, installation, register,"
+	        			+ " logicalregisternumber,              businesspartnernumber, contractaccount, utilitiescontract,"
+	        			+ " regionalstructuregrouping, functionallocation )             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+	        }
+
+	        if ("HOURLY".equals(readIntervalType))
+	        {
+	          String sliceTodaysReadings = "DELETE from app.meter_ami_reads_hourly where reading_datetime > '" + maxHourlyReadingDatesInPostgresSinkToSlice + "'";
+	          debugQuery(sliceTodaysReadings);
+	          pgConn.createStatement().executeUpdate(sliceTodaysReadings);
+
+	          insertSQL = "INSERT INTO app.meter_ami_reads_hourly (headend_meter_id, utilities_premise, reading_datetime, timezone, "
+	          		+ "reading_value, unit_of_measure, consumption, read_interval, equipmentnumber, installation, register, "
+	          		+ "logicalregisternumber,              businesspartnernumber, contractaccount, utilitiescontract, "
+	          		+ "regionalstructuregrouping, functionallocation)     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+	        }
+	        
 	      PreparedStatement pstmt = pgConn.prepareStatement(insertSQL);
 	      do
 	      {
@@ -605,13 +654,14 @@ public class LoadAMIData
 
 	        pstmt.addBatch();
 	        count++;
+	        
 	      }while (sourceResultSet.next());
 	      pstmt.executeBatch();
 
 	    } else {
 	      logger.info("Skipping. ResultSet was empty - at " + new Date() + " \treadIntervalType=" + readIntervalType);
 	    }
-	    logger.info("Inserted " + count + " rows");
+	    logger.info("Inserted " + count + " rows. "+getTime());
 	  }
 
   private static void updateUsagePrediction(Connection pgConn, Double zScore) throws SQLException
@@ -754,7 +804,7 @@ public class LoadAMIData
     return null;
   }
 
-  private static void updateMeterNextRead(Connection hiveConn, Connection pgConn) throws SQLException
+/*  private static void updateMeterNextRead(Connection hiveConn, Connection pgConn) throws SQLException
   {
     String insertSQL = "INSERT INTO app.meter_next_read(meter_reading_unit, next_read_date)  VALUES (?, ?)";
     String readDateSQL = "select meterreadingunit,min(scheduledmeterreadingdate) next_read_date from awinternal.meterreadingunitschedulerecord  where scheduledmeterreadingdate >= current_date() group by meterreadingunit ";
@@ -778,6 +828,34 @@ public class LoadAMIData
 
     pstmt.executeBatch();
     logger.info("updateMeterNextRead: Inserted " + count + " rows");
+    sourceResultSet.close();
+  }*/
+  
+  
+  private static void updateMeterNextRead(Connection hiveConn, Connection pgConn) throws SQLException
+  {
+    String insertSQL = "INSERT INTO app.meter_next_read(meter_reading_unit, next_read_date)  VALUES (?, ?)";
+    String readDateSQL = "select meterreadingunit,min(scheduledmeterreadingdate) from app.meter_mru_schedule_records where scheduledmeterreadingdate >= current_date group by meterreadingunit";
+
+    debugQuery(readDateSQL);
+    ResultSet sourceResultSet = pgConn.createStatement().executeQuery(readDateSQL);
+
+    String deleteSQL = "delete from app.meter_next_read";
+    debugQuery(deleteSQL);
+    pgConn.createStatement().executeUpdate(deleteSQL);
+
+    debugQuery(insertSQL);
+    PreparedStatement pstmt = pgConn.prepareStatement(insertSQL);
+    int count = 0;
+    while (sourceResultSet.next()) {
+      pstmt.setString(1, sourceResultSet.getString(1));
+      pstmt.setDate(2, sourceResultSet.getDate(2));
+      pstmt.addBatch();
+      count++;
+    }
+
+    pstmt.executeBatch();
+    logger.info("updateMeterNextRead: Inserted " + count + " rows "+ getTime() );
     sourceResultSet.close();
   }
 
@@ -883,5 +961,10 @@ public class LoadAMIData
   private static enum SecureAuthParam
   {
     grant_type, client_id, client_secret, scope, username, password;
+  }
+  
+  private static Date getTime() {
+	  TimeZone.setDefault(TimeZone.getTimeZone("CTT"));
+	  return new Date();
   }
 }
